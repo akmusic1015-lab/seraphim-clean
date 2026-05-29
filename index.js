@@ -514,7 +514,7 @@ client.once(
 
             "Protecting my Queen Angel and the Community",
 
-            `${client.guilds.cache.size} servers protected`,
+            `67 servers protected`,
 
         ];
 
