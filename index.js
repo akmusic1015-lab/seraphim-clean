@@ -512,7 +512,7 @@ client.once(
 
             "s!help | Seraphim Sips",
 
-            "Protecting my Queen Angel and the Community",
+            "Protecting my Queen Angel!",
 
             `67 servers protected`,
 
