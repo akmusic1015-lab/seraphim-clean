@@ -1,9 +1,5 @@
-const path = require("path");
 const Database = require("better-sqlite3");
-
-const db = new Database(
-    path.join(__dirname, "seraphim.db")
-);
+const db = new Database("./database/seraphim.db");
 
 // =========================
 // USERS
@@ -46,33 +42,12 @@ CREATE TABLE IF NOT EXISTS tree (
 );
 `).run();
 
-// ensure single row
-
-const exists = db.prepare(`
-    SELECT id
-    FROM tree
-    WHERE id = 1
-`).get();
+const exists = db.prepare(`SELECT id FROM tree WHERE id = 1`).get();
 
 if (!exists) {
-
     db.prepare(`
-        INSERT INTO tree (
-            id,
-            level,
-            xp,
-            nextLevelXp,
-            water,
-            weather
-        )
-        VALUES (
-            1,
-            1,
-            0,
-            100,
-            0,
-            'clear'
-        )
+        INSERT INTO tree (id, level, xp, nextLevelXp, water, weather)
+        VALUES (1, 1, 0, 100, 0, 'clear')
     `).run();
 }
 
@@ -100,21 +75,6 @@ CREATE TABLE IF NOT EXISTS streak_history (
     timestamp INTEGER
 );
 `).run();
-
-// =========================
-// SETTINGS
-// =========================
-
-db.prepare(`
-CREATE TABLE IF NOT EXISTS settings (
-    key TEXT PRIMARY KEY,
-    value TEXT
-);
-`).run();
-
-// =========================
-// STARTUP
-// =========================
 
 console.log("✅ Database Connected");
 
