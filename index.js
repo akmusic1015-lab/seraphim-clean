@@ -91,10 +91,7 @@ client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
 
     handleDailyStreak(message.author.id);
-
-    await updateTopStreakRole(client);
 });
-
 // =========================
 // IMPORT SYSTEMS
 // =========================
@@ -546,6 +543,16 @@ client.once(
 
         // ROTATE STATUS
         setInterval(updateStatus, 15000);
+
+        // TOP STREAK ROLE CHECK
+
+updateTopStreakRole(client);
+
+setInterval(() => {
+
+    updateTopStreakRole(client);
+
+}, 1000 * 60 * 10);
 
         // HEARTBEAT LOGGER
         setInterval(() => {

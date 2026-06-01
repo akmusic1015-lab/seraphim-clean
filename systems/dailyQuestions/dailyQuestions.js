@@ -7,9 +7,10 @@ module.exports = (client) => {
     // =========================
 
     const CHANNEL_ID = "1508754404185079830";
+    const QOTD_ROLE_ID = "1495381706243444908";
 
-    // shuffled question pool
     let unusedQuestions = [...questions];
+    let lastSentDate = null;
 
     // =========================
     // RANDOM QUESTION SYSTEM
@@ -17,7 +18,6 @@ module.exports = (client) => {
 
     function getQuestion() {
 
-        // refill when empty
         if (unusedQuestions.length === 0) {
             unusedQuestions = [...questions];
         }
@@ -28,7 +28,6 @@ module.exports = (client) => {
 
         const question = unusedQuestions[index];
 
-        // remove used question
         unusedQuestions.splice(index, 1);
 
         return question;
@@ -50,36 +49,59 @@ module.exports = (client) => {
         await channel.send({
 
             content:
-`╔══════════════════════╗
-      ✨  DAILY QUESTION  ✨
+`
+
+╔══════════════════════╗
+      ✨ DAILY QUESTION ✨
 ╚══════════════════════╝
+
+<@&${QOTD_ROLE_ID}>
 
 > ${question}
 
-🌸 Answer below and talk with everyone!
-💬 New question every 24 hours.
+🌸 Answer below and chat with everyone!
+💬 New question every day at 7:00 AM AEST.
 ━━━━━━━━━━━━━━━━━━━━━━━`
         });
+
+        console.log("❓ Daily Question Sent");
     }
 
     // =========================
     // BOT READY
     // =========================
 
-    client.once("clientReady", async () => {
+    client.once("clientReady", () => {
 
         console.log("❓ Daily Questions Loaded");
 
-        // OPTIONAL:
-        // Uncomment this if you want one sent when bot starts
+        setInterval(async () => {
 
-        // sendQuestion();
+            const now = new Date(
+                new Date().toLocaleString(
+                    "en-US",
+                    {
+                        timeZone: "Australia/Brisbane"
+                    }
+                )
+            );
 
-        // send every 24h
-        setInterval(() => {
+            const today =
+                now.toISOString().split("T")[0];
 
-            sendQuestion();
+            if (
+                now.getHours() === 7 &&
+                now.getMinutes() === 0 &&
+                lastSentDate !== today
+            ) {
 
-        }, 1000 * 60 * 60 * 24);
+                lastSentDate = today;
+
+                await sendQuestion();
+            }
+
+        }, 60000); // check every minute
+
     });
+
 };

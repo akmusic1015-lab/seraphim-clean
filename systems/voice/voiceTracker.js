@@ -8,7 +8,6 @@ module.exports = (client) => {
     // =========================
 
     const COINS_PER_INTERVAL = 50;
-
     const INTERVAL_MINUTES = 5;
 
     // optional AFK channel
@@ -17,7 +16,10 @@ module.exports = (client) => {
     // =========================
     // LOOP
     // =========================
+
     setInterval(async () => {
+
+        let rewarded = 0;
 
         for (const guild of client.guilds.cache.values()) {
 
@@ -27,8 +29,7 @@ module.exports = (client) => {
 
                 if (member.user.bot) continue;
 
-                const vc =
-                    member.voice;
+                const vc = member.voice;
 
                 // not in VC
                 if (!vc.channelId)
@@ -37,8 +38,7 @@ module.exports = (client) => {
                 // AFK channel ignore
                 if (
                     AFK_CHANNEL_ID &&
-                    vc.channelId ===
-                    AFK_CHANNEL_ID
+                    vc.channelId === AFK_CHANNEL_ID
                 ) continue;
 
                 // self deafened
@@ -49,7 +49,15 @@ module.exports = (client) => {
                 if (vc.selfMute)
                     continue;
 
-                // create user
+                // server deafened
+                if (vc.serverDeaf)
+                    continue;
+
+                // server muted
+                if (vc.serverMute)
+                    continue;
+
+                // create user if missing
                 getUser(member.id);
 
                 // reward
@@ -69,11 +77,15 @@ module.exports = (client) => {
                     member.id
                 );
 
-                console.log(
-                    `🎤 ${member.user.tag} earned ${COINS_PER_INTERVAL} coins`
-                );
+                rewarded++;
             }
+        }
 
+        if (rewarded > 0) {
+
+            console.log(
+                `🎤 VC Rewards Processed | ${rewarded} users rewarded`
+            );
         }
 
     }, 1000 * 60 * INTERVAL_MINUTES);

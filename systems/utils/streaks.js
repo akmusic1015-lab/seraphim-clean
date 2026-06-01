@@ -5,7 +5,10 @@ const DAY = 1000 * 60 * 60 * 24;
 function handleDailyStreak(userId) {
 
     const user = db.prepare(`
-        SELECT messageStreak, recordStreak, lastMessageDate
+        SELECT
+            messageStreak,
+            recordStreak,
+            lastMessageDate
         FROM users
         WHERE userId = ?
     `).get(userId);
@@ -13,41 +16,69 @@ function handleDailyStreak(userId) {
     const now = Date.now();
 
     if (!user) {
+
         db.prepare(`
-            INSERT INTO users (userId, messageStreak, recordStreak, lastMessageDate)
+            INSERT INTO users (
+                userId,
+                messageStreak,
+                recordStreak,
+                lastMessageDate
+            )
             VALUES (?, 1, 1, ?)
-        `).run(userId, now);
+        `).run(
+            userId,
+            now
+        );
+
         return;
     }
 
-    const last = Number(user.lastMessageDate || 0);
+    const last =
+        Number(user.lastMessageDate || 0);
 
-    // ❌ same day = do nothing
-    if (now - last < DAY) return;
+    const difference =
+        now - last;
 
-    let newStreak;
-
-    // ✔ within 48h = continue streak
-    if (now - last < DAY * 2) {
-        newStreak = (user.messageStreak || 0) + 1;
-    } else {
-        newStreak = 1;
+    // Same day
+    if (difference < DAY) {
+        return;
     }
 
-    const newBest = Math.max(user.recordStreak || 0, newStreak);
+    let newStreak = 1;
+
+    // Continue streak
+    if (difference < DAY * 2) {
+
+        newStreak =
+            (user.messageStreak || 0) + 1;
+    }
+
+    const newBest = Math.max(
+        user.recordStreak || 0,
+        newStreak
+    );
 
     db.prepare(`
         UPDATE users
-        SET messageStreak = ?,
+        SET
+            messageStreak = ?,
             recordStreak = ?,
             lastMessageDate = ?
         WHERE userId = ?
-    `).run(newStreak, newBest, now, userId);
+    `).run(
+        newStreak,
+        newBest,
+        now,
+        userId
+    );
 }
 
 function getUserStreak(userId) {
+
     return db.prepare(`
-        SELECT messageStreak, recordStreak
+        SELECT
+            messageStreak,
+            recordStreak
         FROM users
         WHERE userId = ?
     `).get(userId);

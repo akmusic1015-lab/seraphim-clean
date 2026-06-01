@@ -14,19 +14,19 @@ module.exports = (client) => {
 
         {
             stat: "totalMessages",
-            required: 1000,
+            required: 100,
             roleId: "1508749187708096572"
         },
 
         {
             stat: "totalMessages",
-            required: 5000,
+            required: 500,
             roleId: "1508749724448985228"
         },
 
         {
             stat: "totalMessages",
-            required: 10000,
+            required: 2500,
             roleId: "1508749424724017223"
         },
 
@@ -36,19 +36,19 @@ module.exports = (client) => {
 
         {
             stat: "totalVcMinutes",
-            required: 600,
+            required: 300,
             roleId: "1508749618262048818"
         },
 
         {
             stat: "totalVcMinutes",
-            required: 3000,
+            required: 1200,
             roleId: "1508749373113368617"
         },
 
         {
             stat: "totalVcMinutes",
-            required: 6000,
+            required: 3000,
             roleId: "1508749822184657026"
         }
 
@@ -57,6 +57,7 @@ module.exports = (client) => {
     // =========================
     // CHECK LOOP
     // =========================
+
     setInterval(async () => {
 
         for (const guild of client.guilds.cache.values()) {
@@ -67,43 +68,37 @@ module.exports = (client) => {
 
                 if (member.user.bot) continue;
 
-                const user =
-                    db.prepare(`
-                        SELECT *
-                        FROM users
-                        WHERE userId = ?
-                    `).get(member.id);
+                const user = db.prepare(`
+                    SELECT *
+                    FROM users
+                    WHERE userId = ?
+                `).get(member.id);
 
                 if (!user) continue;
 
                 for (const achievement of achievements) {
 
                     const current =
-                        user[achievement.stat];
+                        user[achievement.stat] || 0;
 
                     if (
-                        current >=
-                        achievement.required
+                        current >= achievement.required &&
+                        !member.roles.cache.has(
+                            achievement.roleId
+                        )
                     ) {
 
-                        if (
-                            !member.roles.cache.has(
-                                achievement.roleId
-                            )
-                        ) {
+                        await member.roles
+                            .add(achievement.roleId)
+                            .catch(() => {});
 
-                            await member.roles.add(
-                                achievement.roleId
-                            ).catch(() => {});
+                        console.log(
+                            `🏆 ${member.user.tag} unlocked ${achievement.stat} (${achievement.required})`
+                        );
 
-                            console.log(
-                                `🏆 ${member.user.tag} earned achievement role`
-                            );
-                        }
                     }
                 }
             }
-
         }
 
     }, 1000 * 60 * 5);

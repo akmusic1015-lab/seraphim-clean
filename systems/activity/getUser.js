@@ -8,7 +8,6 @@ module.exports = (userId) => {
         WHERE userId = ?
     `).get(userId);
 
-    // create user if missing
     if (!user) {
 
         db.prepare(`
@@ -18,11 +17,29 @@ module.exports = (userId) => {
             VALUES (?)
         `).run(userId);
 
-        user = db.prepare(`
-            SELECT *
-            FROM users
-            WHERE userId = ?
-        `).get(userId);
+        user = {
+            userId,
+            wallet: 0,
+            bank: 0,
+            messages: 0,
+            vcMinutes: 0,
+            chatStreak: 0,
+            vcStreak: 0,
+            lastMessageDate: null,
+            messageStreak: 0,
+            weeklyMessages: 0,
+            totalMessages: 0,
+            weeklyVcMinutes: 0,
+            totalVcMinutes: 0,
+            dailyCooldown: 0,
+            workCooldown: 0,
+            recordStreak: 0,
+            everTop: 0
+        };
+
+        console.log(
+            `👤 Created user: ${userId}`
+        );
     }
 
     return user;

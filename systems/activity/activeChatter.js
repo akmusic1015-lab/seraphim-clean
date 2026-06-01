@@ -14,7 +14,11 @@ module.exports = (client) => {
     // =========================
     // CHECK LOOP
     // =========================
+
     setInterval(async () => {
+
+        let given = 0;
+        let removed = 0;
 
         for (const guild of client.guilds.cache.values()) {
 
@@ -23,22 +27,22 @@ module.exports = (client) => {
 
             if (!role) continue;
 
-            const members = guild.members.cache;
-
-            for (const member of members.values()) {
+            for (const member of guild.members.cache.values()) {
 
                 if (member.user.bot) continue;
 
-                const user =
-                    db.prepare(`
-                        SELECT *
-                        FROM users
-                        WHERE userId = ?
-                    `).get(member.id);
+                const user = db.prepare(`
+                    SELECT weeklyMessages
+                    FROM users
+                    WHERE userId = ?
+                `).get(member.id);
 
                 if (!user) continue;
 
-                // active
+                // =========================
+                // GIVE ROLE
+                // =========================
+
                 if (
                     user.weeklyMessages >=
                     REQUIRED_MESSAGES
@@ -50,13 +54,22 @@ module.exports = (client) => {
                         )
                     ) {
 
-                        await member.roles.add(
-                            ROLE_ID
-                        ).catch(() => {});
+                        await member.roles
+                            .add(ROLE_ID)
+                            .catch(() => {});
+
+                        given++;
+
+                        console.log(
+                            `🔥 Active Chatter → ${member.user.tag}`
+                        );
                     }
                 }
 
-                // inactive
+                // =========================
+                // REMOVE ROLE
+                // =========================
+
                 else {
 
                     if (
@@ -65,12 +78,25 @@ module.exports = (client) => {
                         )
                     ) {
 
-                        await member.roles.remove(
-                            ROLE_ID
-                        ).catch(() => {});
+                        await member.roles
+                            .remove(ROLE_ID)
+                            .catch(() => {});
+
+                        removed++;
+
+                        console.log(
+                            `💤 Removed Active Chatter → ${member.user.tag}`
+                        );
                     }
                 }
             }
+        }
+
+        if (given > 0 || removed > 0) {
+
+            console.log(
+                `📊 Active Chatter Update | Added: ${given} | Removed: ${removed}`
+            );
         }
 
     }, 1000 * 60 * 10);
