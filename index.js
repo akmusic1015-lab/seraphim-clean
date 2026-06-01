@@ -90,7 +90,11 @@ client.on("messageCreate", async (message) => {
 
     if (message.author.bot) return;
 
+    // ✅ streak system
     handleDailyStreak(message.author.id);
+
+    // ✅ FIX: message tracking (THIS WAS MISSING)
+    messageTracker(message);
 });
 // =========================
 // IMPORT SYSTEMS
@@ -113,6 +117,9 @@ require("./systems/voice/activeVC");
 
 const dailyQuestions =
 require("./systems/dailyQuestions/dailyQuestions");
+
+const messageTracker =
+require("./systems/activity/messageTracker");
 
 // =========================
 // STAFF CHECK
@@ -546,12 +553,8 @@ client.once(
 
         // TOP STREAK ROLE CHECK
 
-updateTopStreakRole(client);
-
 setInterval(() => {
-
     updateTopStreakRole(client);
-
 }, 1000 * 60 * 10);
 
         // HEARTBEAT LOGGER
